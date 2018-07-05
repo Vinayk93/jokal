@@ -1,0 +1,19 @@
+{
+  "name": "jokal",
+  "version": "1.0.0",
+  "description": "serverless development on local",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "npm test"
+  },
+  "author": "vinay@code5.org",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.3",
+    "path": "^0.12.7"
+  }
+}
