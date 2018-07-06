@@ -1,0 +1,27 @@
+{
+	"API":{
+		"SwaggerFile":"swagger.json",
+		"defaultTimeout":60
+	},
+	"Lambda":{
+		"Categories":{
+			"Timeout":20,
+			"Code":"./lambda/Categories/index.handler",
+			"bin":"",
+			"api":{
+				"method":"ANY",
+				"url":"/categories"
+			},
+			"Variable":{
+				"SomeVariable":"Show that Variable"
+			},
+			"ParseData":{
+				"query":"event.query",
+				"params":"event.params",
+				"body":"event.body",
+				"url":"event.url",
+				"headers":"event.headers"
+			}
+		}
+	}
+}
