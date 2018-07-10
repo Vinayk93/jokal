@@ -10,6 +10,7 @@ const Find_Cloud_Executed_DockerContainer = require("./lib/dockerContainer");
  * Integrate dynamodb and s3 on the system
  * if not found
  */
+const CLOUD = require(process.cwd()+'/Cloud.json');
 const cloud ={
 	"API":{
 		"type":"object",
@@ -82,14 +83,42 @@ const cloud ={
 				}
 			}
 		}
-	};
+};
 
-Schemavalidation(cloud,process.cwd()+'/Cloud.json',function(err){
+Schemavalidation(cloud,CLOUD,function(err){
 	if(err){
 		throw new new Error(err);
 	}
 });
 
+/**
+ * 1. this will act as a Lambda to execute function
+ * 2. and check for url
+ */
+mainapp.use('/*',(req,res,next)=>{
+	/**
+	 * Find the method and url present in the Cloud.json 
+	*/
+	let allow=0
+	let API={};
+	// console.log(CLOUD);
+	// console.log(req.baseUrl);
+	// console.log(req.method);
+	Object.keys(CLOUD.Lambda).forEach((Element)=>{
+		API = CLOUD.Lambda[Element].api;
+		console.log(API);
+		if( (API.method == "ANY" || API.method == req.method ) && API.url == req.baseUrl){
+			allow=1;
+			console.log("$LATEST");
+			next();
+		}
+	});
+	if(allow != 1){
+		setTimeout(()=>{
+			res.status(404).send("Not Found");
+		},0,res);
+	}
+});
 /**
  * [description]
  * 1. find the url it need to hit
@@ -97,9 +126,7 @@ Schemavalidation(cloud,process.cwd()+'/Cloud.json',function(err){
  * 3. Now every hit find the url of the execution
  */
 mainapp.use('/*',(req,res,next)=>{
-
-	Find_Cloud_Executed_DockerContainer(req.baseUrl+"0000000"+req.method,req,function(found,err,data){
-		if(found == "true"){
+	Find_Cloud_Executed_DockerContainer(req.baseUrl,req.method,req,function(found,err,data){
 			if(err){
 				res.status(500).send("Internal Server Error");
 			}else{
@@ -112,14 +139,11 @@ mainapp.use('/*',(req,res,next)=>{
 					res.send(data);
 				}
 			}
-		}else{
-			res.status(404).send("Not Found");
-		}
 	});
 	/*1 min threshold Sec Timeout */
 	setTimeout(function () {
 		res.send("Request Timeout");
-	}, 60000, res);
+	}, 50000, res);
 });
 
 mainapp.listen(4000,()=>console.log('APIS are live on http://localhost:4000/'));
