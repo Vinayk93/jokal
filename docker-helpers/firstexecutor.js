@@ -6,5 +6,6 @@ var Execution={
     "context":process.argv[4]
 };
 console.log(Execution);
-var lambda = require('../examples/lambda/'+Execution.Module+"/"+Execution.Folder);
+
+var lambda = require('/app/'+Execution.Module+"/"+Execution.Folder);
 lambda[Execution.Extension];

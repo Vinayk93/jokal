@@ -6,7 +6,8 @@
 	"Lambda":{
 		"Categories":{
 			"Timeout":20,
-			"Code":"./lambda/Categories/index.handler",
+			"Module":"Categories",
+			"Code":"./Categories/index.handler",
 			"bin":"",
 			"api":{
 				"method":"ANY",

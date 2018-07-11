@@ -5,7 +5,8 @@ var mainapp = express();
 
 // import important code
 const Schemavalidation = require('./helper/validation');
-const Find_Cloud_Executed_DockerContainer = require("./lib/dockerContainer");
+const Find_Cloud_Executed_DockerContainer = require("./lib/docker");
+const Lambda_relative = require('./helper/lambda_relative');
 /**
  * Integrate dynamodb and s3 on the system
  * if not found
@@ -100,14 +101,15 @@ mainapp.use('/*',(req,res,next)=>{
 	 * Find the method and url present in the Cloud.json 
 	*/
 	let allow=0
-	let API={};
+	let CONF={};
 	// console.log(CLOUD);
 	// console.log(req.baseUrl);
 	// console.log(req.method);
 	Object.keys(CLOUD.Lambda).forEach((Element)=>{
-		API = CLOUD.Lambda[Element].api;
-		console.log(API);
-		if( (API.method == "ANY" || API.method == req.method ) && API.url == req.baseUrl){
+		CONF = CLOUD.Lambda[Element];
+		if( (CONF.api.method == "ANY" || CONF.api.method == req.method ) && CONF.api.url == req.baseUrl){
+			req.Module =Element;
+			req.CONF = CONF;
 			allow=1;
 			console.log("$LATEST");
 			next();
@@ -126,8 +128,18 @@ mainapp.use('/*',(req,res,next)=>{
  * 3. Now every hit find the url of the execution
  */
 mainapp.use('/*',(req,res,next)=>{
-	Find_Cloud_Executed_DockerContainer(req.baseUrl,req.method,req,function(found,err,data){
-			if(err){
+	console.log(req.CONF);
+	path="/app/"+req.CONF.Code;
+	Module = req.CONF.Module;
+	event = Lambda_relative.get_event();
+	context = Lambda_relative.get_context();
+
+	// execution=
+	// ,event,context,callback
+
+	Find_Cloud_Executed_DockerContainer.Execute(global.container,path,Module,event,context,function(err,data){
+			console.log(err);	
+		if(err){
 				res.status(500).send("Internal Server Error");
 			}else{
 				res.type('json');
@@ -146,7 +158,16 @@ mainapp.use('/*',(req,res,next)=>{
 	}, 50000, res);
 });
 
-mainapp.listen(4000,()=>console.log('APIS are live on http://localhost:4000/'));
+console.log(Find_Cloud_Executed_DockerContainer);
+Find_Cloud_Executed_DockerContainer.Start(function(err,container){
+	console.log('this is the container');
+	global.container = container;
+	if(err){
+		throw new Error(err);
+	}
+	mainapp.listen(4000,()=>console.log('APIS are live on http://localhost:4000/'));
+});
+
 
 
 
