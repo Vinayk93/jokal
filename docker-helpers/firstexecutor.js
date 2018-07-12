@@ -18,16 +18,18 @@ require('./console_management')(__dirname+"/");
  * and then move all console.log to the container timer output which will be used for the log
  * and it is used for the output purpose only
  */
+var lambda = require('../examples/lambda/'+Execution.Module+"/"+Execution.Folder);
 
 if(process.argv[1]="firstexecutor"){
-    var lambda = require('../examples/lambda/'+Execution.Module+"/"+Execution.Folder);
+    
         lambda[Execution.Extension](Execution.event,Execution.context,function(data){
             // console.log(data);
             bash.log(data);
         });
-    
-
 }else{
     var lambda = require('/app/lambda/'+Execution.Module+"/"+Execution.Folder);
-    lambda[Execution.Extension];
+    lambda[Execution.Extension](Execution.event,Execution.context,function(data){
+        // console.log(data);
+        bash.log(data);
+    });
 }
