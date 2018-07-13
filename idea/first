@@ -1,4 +1,10 @@
 
 1. swagger implementation both backend
-2. docker implementation
+2. docker implementation ** almoost done with get callback as a warning (need to be more presice);
+** Will add docker warning disable
+** install docker with images currently not implemented
+** 
+** test cases implementation 1 click all test
+** 
 3. DB,S3,External libraries integration
+

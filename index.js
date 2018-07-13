@@ -85,7 +85,7 @@ const cloud ={
 			}
 		}
 };
-
+global.container = "";
 Schemavalidation(cloud,CLOUD,function(err){
 	if(err){
 		throw new new Error(err);
@@ -128,20 +128,21 @@ mainapp.use('/*',(req,res,next)=>{
  * 3. Now every hit find the url of the execution
  */
 mainapp.use('/*',(req,res,next)=>{
-	console.log(req.CONF);
-	path="/app/"+req.CONF.Code;
+	req.Timedout = 100;
+	// console.log(req);
+	// console.log(req.CONF);
+	path=req.CONF.Code;
 	Module = req.CONF.Module;
 	event = Lambda_relative.get_event();
 	context = Lambda_relative.get_context();
-
-	// execution=
-	// ,event,context,callback
-
-	Find_Cloud_Executed_DockerContainer.Execute(global.container,path,Module,event,context,function(err,data){
+	t1=process.hrtime()[1];
+	Find_Cloud_Executed_DockerContainer.Execute(global.container,Module,path,event,context,function(err,data){
+		t2=process.hrtime()[1];
+		console.log(t2-t1);
 			console.log(err);	
 		if(err){
 				res.status(500).send("Internal Server Error");
-			}else{
+		}else{
 				res.type('json');
 				res.set(data.headers);
 
@@ -150,15 +151,16 @@ mainapp.use('/*',(req,res,next)=>{
 				}else{
 					res.send(data);
 				}
-			}
+		}
 	});
 	/*1 min threshold Sec Timeout */
-	setTimeout(function () {
-		res.send("Request Timeout");
-	}, 50000, res);
+	// setTimeout(function () {
+	// 	if(completed == false){
+	// 		res.send("Request Timeout");
+	// 	}
+	// }, 5000, res);
 });
 
-console.log(Find_Cloud_Executed_DockerContainer);
 Find_Cloud_Executed_DockerContainer.Start(function(err,container){
 	console.log('this is the container');
 	global.container = container;
@@ -166,6 +168,7 @@ Find_Cloud_Executed_DockerContainer.Start(function(err,container){
 		throw new Error(err);
 	}
 	mainapp.listen(4000,()=>console.log('APIS are live on http://localhost:4000/'));
+	mainapp.Timeout =10000;
 });
 
 
