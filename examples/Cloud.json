@@ -7,7 +7,7 @@
 		"Categories":{
 			"Timeout":20,
 			"Module":"Categories",
-			"Code":"./Categories/index.handler",
+			"Code":"index.handler",
 			"bin":"",
 			"api":{
 				"method":"ANY",
