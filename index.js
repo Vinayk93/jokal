@@ -91,84 +91,85 @@ Schemavalidation(cloud,CLOUD,function(err){
 		throw new new Error(err);
 	}
 });
-
-/**
- * 1. this will act as a Lambda to execute function
- * 2. and check for url
- */
-mainapp.use('/*',(req,res,next)=>{
-	/**
-	 * Find the method and url present in the Cloud.json 
-	*/
-	let allow=0
-	let CONF={};
-	// console.log(CLOUD);
-	// console.log(req.baseUrl);
-	// console.log(req.method);
-	Object.keys(CLOUD.Lambda).forEach((Element)=>{
-		CONF = CLOUD.Lambda[Element];
-		if( (CONF.api.method == "ANY" || CONF.api.method == req.method ) && CONF.api.url == req.baseUrl){
-			req.Module =Element;
-			req.CONF = CONF;
-			allow=1;
-			console.log("$LATEST");
-			next();
-		}
-	});
-	if(allow != 1){
-		setTimeout(()=>{
-			res.status(404).send("Not Found");
-		},0,res);
-	}
-});
-/**
- * [description]
- * 1. find the url it need to hit
- * 2. take Timeout,Code,bin,Variable and ParseData to the docker and create a api for the execution
- * 3. Now every hit find the url of the execution
- */
-mainapp.use('/*',(req,res,next)=>{
-	req.Timedout = 100;
-	// console.log(req);
-	// console.log(req.CONF);
-	path=req.CONF.Code;
-	Module = req.CONF.Module;
-	event = Lambda_relative.get_event();
-	context = Lambda_relative.get_context();
-	t1=process.hrtime()[1];
-	Find_Cloud_Executed_DockerContainer.Execute(global.container,Module,path,event,context,function(err,data){
-		t2=process.hrtime()[1];
-		console.log(t2-t1);
-			console.log(err);	
-		if(err){
-				res.status(500).send("Internal Server Error");
-		}else{
-				res.type('json');
-				res.set(data.headers);
-
-				if(data.status){
-					res.status(data.status).send(data.body);
-				}else{
-					res.send(data);
-				}
-		}
-	});
-	/*1 min threshold Sec Timeout */
-	// setTimeout(function () {
-	// 	if(completed == false){
-	// 		res.send("Request Timeout");
-	// 	}
-	// }, 5000, res);
-});
-
 Find_Cloud_Executed_DockerContainer.Start(function(err,container){
-	console.log('this is the container');
+	console.log('this is the container '+container);
 	global.container = container;
+	/**
+	 * 1. this will act as a Lambda to execute function
+	 * 2. and check for url
+	 */
+	mainapp.use('/*',(req,res,next)=>{
+		/**
+		 * Find the method and url present in the Cloud.json 
+		*/
+		let allow=0
+		let CONF={};
+		// console.log(CLOUD);
+		// console.log(req.baseUrl);
+		// console.log(req.method);
+		Object.keys(CLOUD.Lambda).forEach((Element)=>{
+			CONF = CLOUD.Lambda[Element];
+			if( (CONF.api.method == "ANY" || CONF.api.method == req.method ) && CONF.api.url == req.baseUrl){
+				req.Module =Element;
+				req.CONF = CONF;
+				allow=1;
+				console.log("$LATEST");
+				next();
+			}
+		});
+		if(allow != 1){
+			setTimeout(()=>{
+				res.status(404).send("Not Found");
+			},0,res);
+		}
+	});
+	/**
+	 * [description]
+	 * 1. find the url it need to hit
+	 * 2. take Timeout,Code,bin,Variable and ParseData to the docker and create a api for the execution
+	 * 3. Now every hit find the url of the execution
+	 */
+	mainapp.use('/*',(req,res,next)=>{
+		req.Timedout = 100;
+		// console.log(req);
+		// console.log(req.CONF);
+		path=req.CONF.Code;
+		Module = req.CONF.Module;
+		event = Lambda_relative.get_event();
+		context = Lambda_relative.get_context();
+		t1=process.hrtime()[1];
+		Find_Cloud_Executed_DockerContainer.Execute(global.container,Module,path,event,context,function(err,data){
+			t2=process.hrtime()[1];
+			console.log(t2-t1);
+				console.log(err);	
+			if(err){
+					res.status(500).send("Internal Server Error");
+			}else{
+					res.type('json');
+					res.set(data.headers);
+
+					if(data.status){
+						res.status(data.status).send(data.body);
+					}else{
+						res.send(data);
+					}
+			}
+		});
+		/*1 min threshold Sec Timeout */
+		// setTimeout(function () {
+		// 	if(completed == false){
+		// 		res.send("Request Timeout");
+		// 	}
+		// }, 5000, res);
+	});
+
+	
 	if(err){
 		throw new Error(err);
 	}
 	mainapp.listen(4000,()=>console.log('APIS are live on http://localhost:4000/'));
 	mainapp.Timeout =10000;
+		
 });
 
 
