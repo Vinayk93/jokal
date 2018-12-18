@@ -6,7 +6,7 @@
 	"port":3000,
 	"Lambda":{
 		"Categories":{
-			"Timeout":20,
+			"Timeout":0,
 			"Code":"Categories/index.handler",
 			"bin":"",
 			"api":{
@@ -15,13 +15,6 @@
 			},
 			"Variable":{
 				"SomeVariable":"Show that Variable"
-			},
-			"ParseData":{
-				"query":"event.query",
-				"params":"event.params",
-				"body":"event.body",
-				"url":"event.url",
-				"headers":"event.headers"
 			}
 		},
 		"Categories2":{
@@ -34,13 +27,6 @@
 			},
 			"Variable":{
 				"SomeVariable":"Show that Variable"
-			},
-			"ParseData":{
-				"query":"event.query",
-				"params":"event.params",
-				"body":"event.body",
-				"url":"event.url",
-				"headers":"event.headers"
 			}
 		}
 	}
