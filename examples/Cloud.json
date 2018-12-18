@@ -3,15 +3,34 @@
 		"SwaggerFile":"swagger.json",
 		"defaultTimeout":60
 	},
+	"port":3000,
 	"Lambda":{
 		"Categories":{
 			"Timeout":20,
-			"Module":"Categories",
-			"Code":"index.handler",
+			"Code":"Categories/index.handler",
 			"bin":"",
 			"api":{
 				"method":"ANY",
 				"url":"/categories"
+			},
+			"Variable":{
+				"SomeVariable":"Show that Variable"
+			},
+			"ParseData":{
+				"query":"event.query",
+				"params":"event.params",
+				"body":"event.body",
+				"url":"event.url",
+				"headers":"event.headers"
+			}
+		},
+		"Categories2":{
+			"Timeout":20,
+			"Code":"Categories2/index.handler",
+			"bin":"",
+			"api":{
+				"method":"ANY",
+				"url":"/categories2"
 			},
 			"Variable":{
 				"SomeVariable":"Show that Variable"

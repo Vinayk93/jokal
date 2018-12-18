@@ -12,6 +12,7 @@ const Lambda_relative = require('./helper/lambda_relative');
  * if not found
  */
 const CLOUD = require(process.cwd()+'/Cloud.json');
+
 const cloud ={
 	"API":{
 		"type":"object",
@@ -85,12 +86,19 @@ const cloud ={
 			}
 		}
 };
+
 global.container = "";
 Schemavalidation(cloud,CLOUD,function(err){
 	if(err){
 		throw new new Error(err);
 	}
 });
+/**
+ * Warm up the container
+ * share the module it
+ * refresh the server (nodemon)
+ */
+
 Find_Cloud_Executed_DockerContainer.Start(function(err,container){
 	console.log('this is the container '+container);
 	global.container = container;
@@ -102,7 +110,7 @@ Find_Cloud_Executed_DockerContainer.Start(function(err,container){
 		/**
 		 * Find the method and url present in the Cloud.json 
 		*/
-		let allow=0
+		let allow = 0;
 		let CONF={};
 		// console.log(CLOUD);
 		// console.log(req.baseUrl);
@@ -110,9 +118,9 @@ Find_Cloud_Executed_DockerContainer.Start(function(err,container){
 		Object.keys(CLOUD.Lambda).forEach((Element)=>{
 			CONF = CLOUD.Lambda[Element];
 			if( (CONF.api.method == "ANY" || CONF.api.method == req.method ) && CONF.api.url == req.baseUrl){
-				req.Module =Element;
+				req.Module = Element;
 				req.CONF = CONF;
-				allow=1;
+				allow = 1;
 				console.log("$LATEST");
 				next();
 			}
@@ -163,17 +171,9 @@ Find_Cloud_Executed_DockerContainer.Start(function(err,container){
 		// }, 5000, res);
 	});
 
-	
 	if(err){
 		throw new Error(err);
 	}
 	mainapp.listen(4000,()=>console.log('APIS are live on http://localhost:4000/'));
 	mainapp.Timeout =10000;
-		
 });
-
-
-
-
-
-
