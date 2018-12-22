@@ -5,11 +5,8 @@
       "title": "Access Control API (ac-api.ac-prod.blueid.net)",
       "description": "A higher-level and more convenient wrapper around the *operator API*.\nAdditionally offers functionality to manage users and permissions (grouped in roles).\n\nRead the [introduction](https://ac-api.ac-prod.blueid.net/v1/openapi/introduction.html) which describes the basic entities and how to work with the API.\n\n## PLEASE NOTE:\nThis API is a work in **active development**. All endpoints are in use and relatively stable. Nonetheless there are still a few concerns we are currently working on which will cause changes, namely:\n\n* rate limiting: preventing the server from being overloaded (or attacked)\n* more elaborate documentation (e.g. input data restrictions, examples)\n"
     },
-    "host": "ac-api.ac-prod.blueid.net",
+    "host": "localhost:3000",
     "basePath": "/v1",
-    "schemes": [
-      "https"
-    ],
     "tags": [
       {
         "name": "oauth2-clients",

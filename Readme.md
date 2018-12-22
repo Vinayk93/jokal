@@ -10,6 +10,7 @@ No need to install docker OR any 3 party libraries.
 
 Task Remaining:
 1. Implement npm proxy server implementation
+    a. timeout in api
 2. security modules.
 3. ENV varibale
 4. PATH change

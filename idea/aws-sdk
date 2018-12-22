@@ -1,0 +1,12 @@
+when we do like this in the lambda
+var a = require('aws-sdk');
+this will point to the module that inside the node_modules, so what we are going to do make a middleware between online and ofline aws-sdk in such a way that it will always keep same syntax and have ability to gives both functionalities.
+
+So the function can have accept any function any arguments and literaly any callbacks
+then based on the usuage it will choose offline or online.
+
+Need to do before
+1. require function hijacked
+2. function middleware
+3. arguments middleware
+ 
