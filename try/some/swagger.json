@@ -1,0 +1,3675 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "version": "1.4.2",
+      "title": "Access Control API (ac-api.ac-prod.blueid.net)",
+      "description": "A higher-level and more convenient wrapper around the *operator API*.\nAdditionally offers functionality to manage users and permissions (grouped in roles).\n\nRead the [introduction](https://ac-api.ac-prod.blueid.net/v1/openapi/introduction.html) which describes the basic entities and how to work with the API.\n\n## PLEASE NOTE:\nThis API is a work in **active development**. All endpoints are in use and relatively stable. Nonetheless there are still a few concerns we are currently working on which will cause changes, namely:\n\n* rate limiting: preventing the server from being overloaded (or attacked)\n* more elaborate documentation (e.g. input data restrictions, examples)\n"
+    },
+    "host": "localhost:3000",
+    "basePath": "/v1",
+    "tags": [
+      {
+        "name": "oauth2-clients",
+        "description": "OAuth2 client management"
+      },
+      {
+        "name": "locks",
+        "description": "Everything about locks"
+      },
+      {
+        "name": "lock-groups",
+        "description": "Lock group management"
+      },
+      {
+        "name": "lock-group-types",
+        "description": "Lock group type management"
+      },
+      {
+        "name": "devices",
+        "description": "managing access with devices"
+      },
+      {
+        "name": "device-groups",
+        "description": "groups mobile devices"
+      },
+      {
+        "name": "access-permissions",
+        "description": "association between devices and locks"
+      },
+      {
+        "name": "tenants",
+        "description": "Tenant operations"
+      },
+      {
+        "name": "users",
+        "description": "User management"
+      },
+      {
+        "name": "roles",
+        "description": "a set of permissions for users"
+      },
+      {
+        "name": "internal",
+        "description": "internal calls"
+      }
+    ],
+    "securityDefinitions": {
+      "auth": {
+        "type": "oauth2",
+        "flow": "implicit",
+        "authorizationUrl": "https://ac-api.ac-prod.blueid.net/oauth2/authorize",
+        "scopes": {
+          "offline": "Get refresh token",
+          "access-permissions:read": "Read access permissions",
+          "access-permissions:write": "Write access permissions",
+          "devices:read": "Read devices",
+          "devices:write": "Write devices",
+          "device-groups:read": "Read device groups",
+          "device-groups:write": "Write device groups",
+          "locks:read": "Read locks",
+          "locks:write": "Write locks",
+          "cylinders:maintenance": "Allows maintenance operations on the cylinder like getTime, get software version and so on",
+          "lock-groups:read": "Read lock groups",
+          "lock-groups:write": "Write lock groups",
+          "lock-group-types:read": "Read lock group types",
+          "lock-group-types:write": "Write lock group types",
+          "roles:read": "Read user roles",
+          "roles:write": "Write user roles",
+          "tenants:sync": "Synchronize tenant data",
+          "tenants:read": "Read tenants",
+          "tenants:write": "Write tenants",
+          "users:read": "Read user data",
+          "users:write": "Write user data",
+          "nfc-token-writer": "Register NFC cards and retrieve tokens for them",
+          "nfc-token-writer-api-internal": "NFC token writer operations",
+          "oauth2-clients": "Manage OAuth2 clients"
+        }
+      }
+    },
+    "parameters": {
+      "offset": {
+        "name": "offset",
+        "type": "integer",
+        "in": "query",
+        "description": "Offset in the item array"
+      },
+      "limit": {
+        "name": "limit",
+        "type": "integer",
+        "in": "query",
+        "description": "Return only this many elements of the result array"
+      },
+      "query": {
+        "name": "query",
+        "type": "string",
+        "in": "query",
+        "description": "Return only items containing this string in one of it's search attributes"
+      },
+      "orderBy": {
+        "name": "orderBy",
+        "type": "string",
+        "in": "query",
+        "description": "How to order the result items"
+      },
+      "id": {
+        "name": "id",
+        "type": "string",
+        "in": "path",
+        "required": true,
+        "description": "The unique identifier of an entity"
+      }
+    },
+    "definitions": {
+      "Id": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateOAuth2Client": {
+        "type": "object",
+        "description": "OAuth2 client",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string"
+          },
+          "contactName": {
+            "type": "string"
+          },
+          "contactEmail": {
+            "type": "string"
+          },
+          "redirectUris": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "grantTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "password",
+                "implicit",
+                "authorization_code",
+                "refresh_token",
+                "client_credentials",
+                "idaas_token"
+              ]
+            }
+          },
+          "responseTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "code",
+                "token"
+              ]
+            }
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "public": {
+            "type": "boolean"
+          },
+          "sessionDurationSeconds": {
+            "type": "integer",
+            "description": "Duration of the refresh tokens."
+          }
+        }
+      },
+      "OAuth2Client": {
+        "type": "object",
+        "description": "OAuth2 client",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "contactName": {
+            "type": "string"
+          },
+          "contactEmail": {
+            "type": "string"
+          },
+          "redirectUris": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "grantTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "password",
+                "implicit",
+                "authorization_code",
+                "refresh_token",
+                "client_credentials",
+                "idaas_token"
+              ]
+            }
+          },
+          "responseTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "code",
+                "token"
+              ]
+            }
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "public": {
+            "type": "boolean"
+          },
+          "sessionDurationSeconds": {
+            "type": "integer",
+            "description": "Duration of the refresh tokens."
+          }
+        }
+      },
+      "UpdateOAuth2Client": {
+        "type": "object",
+        "description": "OAuth2 client",
+        "properties": {
+          "secret": {
+            "type": "string"
+          },
+          "contactName": {
+            "type": "string"
+          },
+          "contactEmail": {
+            "type": "string"
+          },
+          "redirectUris": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "grantTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "password",
+                "implicit",
+                "authorization_code",
+                "refresh_token",
+                "client_credentials",
+                "idaas_token"
+              ]
+            }
+          },
+          "responseTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "code",
+                "token"
+              ]
+            }
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "public": {
+            "type": "boolean"
+          },
+          "sessionDurationSeconds": {
+            "type": "integer",
+            "description": "Duration of the refresh tokens."
+          }
+        }
+      },
+      "UpdateLock": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "description": "Insert or update a physical lock",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "cylinderId": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateLock": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/UpdateLock"
+          },
+          {
+            "properties": {
+              "lockGroups": {
+                "description": "Array of lock group IDs this lock belongs to.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Lock": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/Id"
+          },
+          {
+            "$ref": "#/definitions/UpdateLock"
+          },
+          {
+            "type": "object"
+          },
+          {
+            "description": "represents a physical lock (e.g. the lock on the front main entrance door to a conference room)"
+          },
+          {
+            "required": [
+              "lockGroups"
+            ],
+            "properties": {
+              "lockGroups": {
+                "description": "Array of lock group IDs this lock belongs to.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "PatchLock": {
+        "type": "object",
+        "description": "Used for partial updating of a lock",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "cylinderId": {
+            "type": "string"
+          },
+          "lockGroups": {
+            "description": "Array of lock group IDs this lock belongs to.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "WriteLockGroupType": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "description": "type of a lock group",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "LockGroupType": {
+        "type": "object",
+        "description": "type of a lock group, e.g. room",
+        "allOf": [
+          {
+            "$ref": "#/definitions/Id"
+          },
+          {
+            "$ref": "#/definitions/WriteLockGroupType"
+          }
+        ]
+      },
+      "WriteLockGroup": {
+        "type": "object",
+        "required": [
+          "lockGroupType",
+          "name",
+          "locks"
+        ],
+        "description": "Inserts or updates a LockGroup",
+        "properties": {
+          "lockGroupType": {
+            "type": "string",
+            "description": "ID of the lock group type that the current lock group belongs to."
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "locks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "LockGroup": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/Id"
+          },
+          {
+            "type": "object"
+          },
+          {
+            "description": "groups several locks which restrict access to something (e.g. the locks of the front and rear entrance doors of the conference room)"
+          },
+          {
+            "required": [
+              "lockGroupType",
+              "name"
+            ],
+            "properties": {
+              "lockGroupType": {
+                "type": "string",
+                "description": "ID of the lock group type that the current lock group belongs to."
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "WriteDevice": {
+        "type": "object",
+        "description": "Updates a Device metadata",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "Device": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/Id"
+          },
+          {
+            "$ref": "#/definitions/WriteDevice"
+          },
+          {
+            "type": "object",
+            "required": [
+              "externalId"
+            ],
+            "description": "A mobile device or NFC card which can be enabled to open a lock",
+            "properties": {
+              "deviceGroupId": {
+                "description": "The device group id, if the device is assigned to a device group",
+                "type": "string"
+              },
+              "externalId": {
+                "description": "The IDaaS ID of the device",
+                "type": "string"
+              },
+              "nfcCardId": {
+                "description": "The NFC Card ID. Only available if the device is a NFC card.",
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "WriteDeviceGroup": {
+        "type": "object",
+        "required": [
+          "name",
+          "devices"
+        ],
+        "description": "Inserts or update a device group",
+        "properties": {
+          "externalId": {
+            "description": "An opaque string that a client can use for integrating with third party systems.",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "devices": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DeviceGroup": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "description": "Groups several devices (e.g. all mobile phones of a family checking into a hotel room)",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "externalId": {
+            "description": "An opaque string that a client can use for integrating with third party systems.",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "WriteAccessPermission": {
+        "type": "object",
+        "required": [
+          "deviceGroup",
+          "lockGroup",
+          "startTime",
+          "endTime"
+        ],
+        "description": "Creates a new access permission",
+        "properties": {
+          "accessPermissionGroupId": {
+            "type": "string"
+          },
+          "deviceGroup": {
+            "$ref": "#/definitions/Id"
+          },
+          "lockGroup": {
+            "$ref": "#/definitions/Id"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "dateTime"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "dateTime"
+          },
+          "externalIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/ExternalId"
+            }
+          }
+        }
+      },
+      "AccessPermission": {
+        "type": "object",
+        "required": [
+          "id",
+          "deviceGroup",
+          "lockGroup",
+          "startTime",
+          "endTime",
+          "creationTime",
+          "externalIds"
+        ],
+        "description": "represents the permission to unlock a group of locks with a group of devices (e.g. all members of a family may access room and the main entrance with all their mobile phones and 2 NFC cards)",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "accessPermissionGroupId": {
+            "type": "string"
+          },
+          "deviceGroup": {
+            "$ref": "#/definitions/DeviceGroup"
+          },
+          "lockGroup": {
+            "$ref": "#/definitions/LockGroup"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "dateTime"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "dateTime"
+          },
+          "creationTime": {
+            "type": "string",
+            "format": "dateTime"
+          },
+          "revocationTime": {
+            "type": "string",
+            "format": "dateTime"
+          },
+          "externalIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/ExternalId"
+            }
+          }
+        }
+      },
+      "ExternalId": {
+        "type": "object",
+        "required": [
+          "systemName",
+          "externalId"
+        ],
+        "description": "A reference to an identifier in another system",
+        "properties": {
+          "systemName": {
+            "type": "string"
+          },
+          "externalId": {
+            "type": "string"
+          }
+        }
+      },
+      "TenantConfiguration": {
+        "type": "object",
+        "required": [
+          "fieldVisibility"
+        ],
+        "properties": {
+          "fieldVisibility": {
+            "type": "object",
+            "required": [
+              "device",
+              "deviceGroup",
+              "lock",
+              "lockGroup"
+            ],
+            "properties": {
+              "device": {
+                "type": "object",
+                "required": [
+                  "description"
+                ],
+                "properties": {
+                  "description": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "deviceGroup": {
+                "type": "object",
+                "required": [
+                  "description"
+                ],
+                "properties": {
+                  "description": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "lock": {
+                "type": "object",
+                "required": [
+                  "description"
+                ],
+                "properties": {
+                  "description": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "lockGroup": {
+                "type": "object",
+                "required": [
+                  "description"
+                ],
+                "properties": {
+                  "description": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "TenantInformation": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "idaasUrl",
+          "deviceApiUrl",
+          "deviceApiKey"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "idaasUrl": {
+            "type": "string"
+          },
+          "deviceApiUrl": {
+            "type": "string"
+          },
+          "deviceApiKey": {
+            "type": "string"
+          }
+        }
+      },
+      "WriteUser": {
+        "type": "object",
+        "required": [
+          "username",
+          "firstName",
+          "lastName",
+          "roles"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 64
+          },
+          "firstName": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "roles": {
+            "type": "array",
+            "description": "a list of user role ids",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "firstName",
+          "lastName",
+          "creationTime"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "creationTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "errorCode",
+          "errorMessage"
+        ],
+        "properties": {
+          "errorCode": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "validationErrors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "namespace": {
+                  "type": "string",
+                  "description": "The attribute that failed the validation, e.g. *Device.Name*"
+                },
+                "validator": {
+                  "type": "string",
+                  "description": "The validator that failed the validation, e.g. *max* or *min*"
+                },
+                "validatorParam": {
+                  "type": "string",
+                  "description": "If the validator requires a parameters, this is it. E.g. *64* for the *max* validator"
+                },
+                "fieldValue": {
+                  "type": "string",
+                  "description": "The attribute value that failed the validation. Only if it can be represented as string."
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "WriteRole": {
+        "type": "object",
+        "description": "Update a role",
+        "required": [
+          "name",
+          "permissions"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "an intention-revealing unqiue name for this role"
+          },
+          "description": {
+            "type": "string",
+            "description": "a more elaborate description of this role"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "The string representation of a permission.\n*Allowed values*\n  - access-permissions:read, access-permissions:write\n  - devices:read, devices:write\n  - device-groups:read, device-groups:write\n  - locks:read, locks:write\n  - lock-groups:read, lock-groups:write\n  - lock-group-types:read, lock-group-types:write\n  - roles:read, roles:write\n  - tenants:sync\n  - users:read, users:write\n  - nfc-token-writer\n"
+            }
+          }
+        }
+      },
+      "Role": {
+        "type": "object",
+        "description": "A set of finer-grained permissions.",
+        "allOf": [
+          {
+            "$ref": "#/definitions/Id"
+          },
+          {
+            "$ref": "#/definitions/WriteRole"
+          },
+          {
+            "properties": {
+              "readOnly": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "CreateToken": {
+        "type": "object",
+        "properties": {
+          "deviceToken": {
+            "type": "string",
+            "description": "A token identifying the device. Such a token can be retrieved using the IDaaS mobile SDK."
+          }
+        }
+      },
+      "Token": {
+        "type": "object",
+        "description": "A cylinder access token",
+        "allOf": [
+          {
+            "$ref": "#/definitions/Id"
+          },
+          {
+            "type": "object",
+            "required": [
+              "idaasId",
+              "commands",
+              "channels"
+            ],
+            "properties": {
+              "idaasId": {
+                "type": "string",
+                "description": "The id of the token in the BlueID Operator API"
+              },
+              "commands": {
+                "type": "array",
+                "description": "The commands that can be executed with this token",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "tokn",
+                    "gtim",
+                    "vers"
+                  ]
+                }
+              },
+              "channels": {
+                "type": "array",
+                "description": "The channels that the token is issued for",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "btspp",
+                    "btlespp",
+                    "socket",
+                    "nfccard"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "responses": {
+      "NotAuthorizedResponse": {
+        "description": "Not authorized to access this resource"
+      },
+      "ForbiddenResponse": {
+        "description": "Insufficient permissions to access this resource"
+      },
+      "BadRequestResponse": {
+        "description": "The request could not processed. Malformed JSON maybe?"
+      },
+      "UnprocessableEntityResponse": {
+        "description": "The request is invalid",
+        "schema": {
+          "$ref": "#/definitions/Error"
+        }
+      }
+    },
+    "paths": {
+      "/oauth2/clients": {
+        "get": {
+          "summary": "Get OAuth2 clients",
+          "security": [
+            {
+              "auth": [
+                "oauth2-clients"
+              ]
+            }
+          ],
+          "tags": [
+            "oauth2-clients"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/offset"
+            },
+            {
+              "$ref": "#/parameters/limit"
+            },
+            {
+              "$ref": "#/parameters/query"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "list of OAuth2 clients",
+              "schema": {
+                "type": "object",
+                "required": [
+                  "totalCount",
+                  "clients"
+                ],
+                "properties": {
+                  "totalCount": {
+                    "type": "integer"
+                  },
+                  "clients": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/OAuth2Client"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "403": {
+              "description": "Forbidden"
+            }
+          }
+        },
+        "post": {
+          "summary": "Register new OAuth2 client",
+          "security": [
+            {
+              "auth": [
+                "oauth2-clients"
+              ]
+            }
+          ],
+          "tags": [
+            "oauth2-clients"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/CreateOAuth2Client"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "OAuth2 client has been successfully created",
+              "schema": {
+                "$ref": "#/definitions/OAuth2Client"
+              }
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "403": {
+              "description": "Forbidden"
+            }
+          }
+        }
+      },
+      "/oauth2/clients/{id}": {
+        "get": {
+          "summary": "Get OAuth2 client",
+          "security": [
+            {
+              "auth": [
+                "oauth2-clients"
+              ]
+            }
+          ],
+          "tags": [
+            "oauth2-clients"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/id"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OAuth2 client",
+              "schema": {
+                "$ref": "#/definitions/OAuth2Client"
+              }
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "403": {
+              "description": "Forbidden"
+            },
+            "404": {
+              "description": "Not found"
+            }
+          }
+        },
+        "patch": {
+          "summary": "Update OAuth2 client",
+          "security": [
+            {
+              "auth": [
+                "oauth2-clients"
+              ]
+            }
+          ],
+          "tags": [
+            "oauth2-clients"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/id"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/UpdateOAuth2Client"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OAuth2 client has been successfully updated",
+              "schema": {
+                "$ref": "#/definitions/OAuth2Client"
+              }
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "403": {
+              "description": "Forbidden"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Delete OAuth2 client",
+          "security": [
+            {
+              "auth": [
+                "oauth2-clients"
+              ]
+            }
+          ],
+          "tags": [
+            "oauth2-clients"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/id"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "OAuth2 client has been successfully deleted"
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "403": {
+              "description": "Forbidden"
+            },
+            "404": {
+              "description": "Not found"
+            }
+          }
+        }
+      },
+      "/tenants": {
+        "post": {
+          "summary": "Register a new tenant.",
+          "description": "Allows a new client / customer to use this API.\nIs linked to a specific _operator api_\n",
+          "security": [
+            {
+              "auth": [
+                "tenants:write"
+              ]
+            }
+          ],
+          "tags": [
+            "tenants"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "idaasUrl": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "deviceApiUrl": {
+                    "type": "string"
+                  },
+                  "deviceApiKey": {
+                    "type": "string"
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Contains roles user credentials for the newly created tenant",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tenantId": {
+                    "type": "string"
+                  },
+                  "adminUserName": {
+                    "type": "string"
+                  },
+                  "adminUserPassword": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        },
+        "get": {
+          "summary": "List registered tenants.",
+          "description": "List all tenants that are allowed to use this API.\n",
+          "security": [
+            {
+              "auth": [
+                "tenants:read"
+              ]
+            }
+          ],
+          "tags": [
+            "tenants"
+          ],
+          "responses": {
+            "200": {
+              "description": "List of tenants",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "idaasUrl": {
+                      "type": "string"
+                    },
+                    "deviceApiUrl": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized"
+            }
+          }
+        }
+      },
+      "/tenants/me": {
+        "get": {
+          "summary": "Return the tenant information",
+          "description": "Gives details about the IDaaS operator and information for registring new devices.",
+          "security": [
+            {
+              "auth": [
+                "cylinders:maintenance"
+              ]
+            }
+          ],
+          "tags": [
+            "tenants"
+          ],
+          "responses": {
+            "200": {
+              "description": "Tenant information",
+              "schema": {
+                "$ref": "#/definitions/TenantInformation"
+              }
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "403": {
+              "description": "Forbidden"
+            }
+          }
+        }
+      },
+      "/tenants/_/device-api-data": {
+        "get": {
+          "summary": "Return the device API data",
+          "description": "Return the device API data required to connect a device.",
+          "tags": [
+            "tenants"
+          ],
+          "parameters": [
+            {
+              "name": "X-Device-Invitation-Code",
+              "in": "header",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Device API data",
+              "schema": {
+                "type": "object",
+                "required": [
+                  "deviceApiUrl",
+                  "deviceApiKey"
+                ],
+                "properties": {
+                  "deviceApiUrl": {
+                    "type": "string"
+                  },
+                  "deviceApiKey": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "403": {
+              "description": "Forbidden"
+            },
+            "404": {
+              "description": "Not found"
+            },
+            "422": {
+              "description": "Invalid validation code"
+            }
+          }
+        }
+      },
+      "/tenants/{id}": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/id"
+          }
+        ],
+        "get": {
+          "summary": "Return the tenant information for arbitrary tenants",
+          "description": "Gives details about the IDaaS operator and information for registring new devices.",
+          "security": [
+            {
+              "auth": [
+                "nfc-token-writer-api-internal"
+              ]
+            }
+          ],
+          "tags": [
+            "tenants"
+          ],
+          "responses": {
+            "200": {
+              "description": "Tenant information",
+              "schema": {
+                "$ref": "#/definitions/TenantInformation"
+              }
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "403": {
+              "description": "Forbidden"
+            }
+          }
+        },
+        "patch": {
+          "summary": "Update tenant",
+          "description": "Updates specified tenant.\n",
+          "security": [
+            {
+              "auth": [
+                "tenants:write"
+              ]
+            }
+          ],
+          "tags": [
+            "tenants"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "idaasUrl": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "deviceApiUrl": {
+                    "type": "string"
+                  },
+                  "deviceApiKey": {
+                    "type": "string"
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Tenant was updated."
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "403": {
+              "description": "Forbidden"
+            }
+          }
+        }
+      },
+      "/tenants/{id}/configuration": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/id"
+          }
+        ],
+        "get": {
+          "summary": "Return the tenant configuration",
+          "description": "Currently used as a set of flags for turning UI elements on and off",
+          "security": [
+            {
+              "auth": []
+            }
+          ],
+          "tags": [
+            "tenants"
+          ],
+          "responses": {
+            "200": {
+              "description": "Tenant configuration",
+              "schema": {
+                "$ref": "#/definitions/TenantConfiguration"
+              }
+            },
+            "401": {
+              "description": "Unauthorized"
+            }
+          }
+        }
+      },
+      "/system/sync": {
+        "get": {
+          "deprecated": true,
+          "summary": "Synchronize the locks and devices with the current information from the underlying trustcenter.",
+          "description": "**PLANNED OBSOLESCENCE**. Required only until we get notifications from the underlying *operator api*. Then we will synchronize the data automatically (and remove this endpoint again)\n",
+          "security": [
+            {
+              "auth": [
+                "tenants:sync"
+              ]
+            }
+          ],
+          "tags": [
+            "system"
+          ],
+          "responses": {
+            "204": {
+              "description": "synchronized with the underlying trustcenter"
+            }
+          }
+        }
+      },
+      "/locks": {
+        "post": {
+          "summary": "Create lock",
+          "security": [
+            {
+              "auth": [
+                "locks:write"
+              ]
+            }
+          ],
+          "tags": [
+            "locks"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/CreateLock"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "The created lock",
+              "schema": {
+                "$ref": "#/definitions/Lock"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "422": {
+              "description": "The request is invalid",
+              "schema": {
+                "$ref": "#/definitions/Error"
+              }
+            }
+          }
+        },
+        "get": {
+          "summary": "Get all locks (possibly filtered by permissions)",
+          "description": "Return all locks the authorized party is allowed to see\n  - Users with locks:read permission can see all locks of a tenant\n  - Devices can see all locks for which they had access-permission for at some point in time\n\nThe result list can be\n  - restricted to a maximum number of entries (_limit_) and\n  - started at a specific position (_offset_)\n\nThe _query_ parameter allows to search for locks containing a specific substring in its name.\n",
+          "security": [
+            {
+              "auth": [
+                "locks:read"
+              ]
+            }
+          ],
+          "tags": [
+            "locks"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/offset"
+            },
+            {
+              "$ref": "#/parameters/limit"
+            },
+            {
+              "$ref": "#/parameters/query"
+            },
+            {
+              "name": "hasCylinder",
+              "type": "string",
+              "in": "query",
+              "description": "'*true*' returns only locks with cylinder, '*false*' returns only locks without cylinder"
+            },
+            {
+              "name": "hasLockGroup",
+              "type": "string",
+              "in": "query",
+              "description": "'*true*' returns only locks within a lock group, '*false*' returns only locks without any lock group"
+            },
+            {
+              "name": "lockGroupIds",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "in": "query",
+              "description": "Searches for locks with exactly these lock group ids"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "list of locks",
+              "schema": {
+                "type": "object",
+                "required": [
+                  "totalCount",
+                  "locks"
+                ],
+                "properties": {
+                  "totalCount": {
+                    "type": "integer"
+                  },
+                  "locks": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/Lock"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        }
+      },
+      "/locks/{id}": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/id"
+          }
+        ],
+        "get": {
+          "summary": "Get detail data for this lock.",
+          "security": [
+            {
+              "auth": [
+                "locks:read"
+              ]
+            }
+          ],
+          "tags": [
+            "locks"
+          ],
+          "responses": {
+            "200": {
+              "description": "lock data",
+              "schema": {
+                "$ref": "#/definitions/Lock"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        },
+        "put": {
+          "summary": "Update lock data.",
+          "description": "Allows to modify the name / description of a lock.\n",
+          "security": [
+            {
+              "auth": [
+                "locks:write"
+              ]
+            }
+          ],
+          "tags": [
+            "locks"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/UpdateLock"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Updated lock data",
+              "schema": {
+                "$ref": "#/definitions/Lock"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        },
+        "patch": {
+          "summary": "Partially updates a lock",
+          "description": "Allows to modify only a part of a lock without knowing the whole resource. This operation is idempotent and\ncan safely be repeated.\n\nAll non-null properties will be updated. It's possible to set CylinderId to \"\" in order to\nremove a cylinder.\n",
+          "security": [
+            {
+              "auth": [
+                "locks:write"
+              ]
+            }
+          ],
+          "tags": [
+            "locks"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/PatchLock"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Updated lock data",
+              "schema": {
+                "$ref": "#/definitions/Lock"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Delete this lock.",
+          "security": [
+            {
+              "auth": [
+                "locks:write"
+              ]
+            }
+          ],
+          "tags": [
+            "locks"
+          ],
+          "responses": {
+            "204": {
+              "description": "OK"
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        }
+      },
+      "/cylinders": {
+        "get": {
+          "summary": "Get cylinders.",
+          "description": "Return cylinders filtered by the query.",
+          "security": [
+            {
+              "auth": [
+                "locks:read"
+              ]
+            }
+          ],
+          "tags": [
+            "locks"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/offset"
+            },
+            {
+              "$ref": "#/parameters/limit"
+            },
+            {
+              "$ref": "#/parameters/query"
+            },
+            {
+              "name": "notInUse",
+              "type": "boolean",
+              "in": "query",
+              "description": "'*true*' returns only cylinders that are not assigned to any lock. '*false*' returns only cylinders that are assigned to a lock."
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "list of cylinders",
+              "schema": {
+                "type": "object",
+                "required": [
+                  "totalCount",
+                  "cylinderIds",
+                  "cylinders"
+                ],
+                "properties": {
+                  "totalCount": {
+                    "type": "integer"
+                  },
+                  "cylinderIds": {
+                    "type": "array",
+                    "description": "Deprecated. Maybe removed in the future. Use cylinders instead.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "cylinders": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "bluetoothDeviceName"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "bluetoothDeviceName": {
+                          "type": "string",
+                          "description": "The Bluetooth user-friendly device name of the cylinder. Only for cylinders that support Bluetooth."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/cylinders/{id}/tokens": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/id"
+          }
+        ],
+        "post": {
+          "summary": "Create a new maintenance token for this cylinder",
+          "description": "Currently this operation only issues bluetooth tokens and automatically determines the channels required by the cylinder",
+          "security": [
+            {
+              "auth": [
+                "cylinders:maintenance"
+              ]
+            }
+          ],
+          "tags": [
+            "locks"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/CreateToken"
+              }
+            },
+            {
+              "name": "commands",
+              "in": "query",
+              "required": false,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "vers",
+                  "gtim",
+                  "time",
+                  "tokn"
+                ]
+              }
+            },
+            {
+              "name": "startTime",
+              "in": "query",
+              "description": "The start time of the token's validity period. Must be < endTime and can arbitrarily in the past. This is helpful if the time of the lock is wrong. Default is now() - 10m.",
+              "required": false,
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "name": "endTime",
+              "in": "query",
+              "description": "The end time of the token's validity period. Must be > startTime and can arbitrarily in the future, but not in the past. This is helpful if the time of the lock is wrong. Default is now() + 60m.",
+              "required": false,
+              "type": "string",
+              "format": "date-time"
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Token created",
+              "schema": {
+                "$ref": "#/definitions/Token"
+              }
+            },
+            "400": {
+              "description": "Parameter wrong, e.g. invalid startTime or endTime format"
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "403": {
+              "$ref": "#/responses/ForbiddenResponse"
+            },
+            "404": {
+              "description": "The cylinder does not support bluetooth. Only bluetooth tokens are currently created by this operation."
+            }
+          }
+        }
+      },
+      "/lock-groups": {
+        "get": {
+          "summary": "Get all lock groups.",
+          "description": "Return all lock groups of this tenant.\n\nThe result list can be\n  - restricted to a maximum number of entries (_limit_) and\n  - started at a specific position (_offset_)\n\nThe _query_ parameter allows to search for devices containing a specific substring in its name.\n",
+          "security": [
+            {
+              "auth": [
+                "lock-groups:read"
+              ]
+            }
+          ],
+          "tags": [
+            "lock-groups"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/offset"
+            },
+            {
+              "$ref": "#/parameters/limit"
+            },
+            {
+              "$ref": "#/parameters/query"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "list of lock groups",
+              "schema": {
+                "type": "object",
+                "required": [
+                  "totalCount",
+                  "lockGroups"
+                ],
+                "properties": {
+                  "totalCount": {
+                    "type": "integer"
+                  },
+                  "lockGroups": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/LockGroup"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        },
+        "post": {
+          "summary": "Create a new lock group.",
+          "security": [
+            {
+              "auth": [
+                "lock-groups:write"
+              ]
+            }
+          ],
+          "tags": [
+            "lock-groups"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/WriteLockGroup"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "created lock group",
+              "schema": {
+                "$ref": "#/definitions/LockGroup"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        }
+      },
+      "/lock-groups/{id}": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/id"
+          }
+        ],
+        "get": {
+          "summary": "Get a lock group.",
+          "security": [
+            {
+              "auth": [
+                "lock-groups:read"
+              ]
+            }
+          ],
+          "tags": [
+            "lock-groups"
+          ],
+          "responses": {
+            "200": {
+              "description": "the lock group",
+              "schema": {
+                "$ref": "#/definitions/LockGroup"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        },
+        "put": {
+          "summary": "Modify this lock group.",
+          "description": "Allows to change the name / description of this lock group.\n",
+          "security": [
+            {
+              "auth": [
+                "lock-groups:write"
+              ]
+            }
+          ],
+          "tags": [
+            "lock-groups"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/WriteLockGroup"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "modified lock group",
+              "schema": {
+                "$ref": "#/definitions/LockGroup"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Delete this lock group.",
+          "security": [
+            {
+              "auth": [
+                "lock-groups:write"
+              ]
+            }
+          ],
+          "tags": [
+            "lock-groups"
+          ],
+          "responses": {
+            "204": {
+              "description": "OK"
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        }
+      },
+      "/lock-groups/{id}/locks": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/id"
+          }
+        ],
+        "get": {
+          "summary": "Get group's locks",
+          "security": [
+            {
+              "auth": [
+                "lock-groups:read",
+                "locks:read"
+              ]
+            }
+          ],
+          "tags": [
+            "lock-groups"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/offset"
+            },
+            {
+              "$ref": "#/parameters/limit"
+            },
+            {
+              "$ref": "#/parameters/query"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "list of locks",
+              "schema": {
+                "type": "object",
+                "required": [
+                  "totalCount",
+                  "locks"
+                ],
+                "properties": {
+                  "totalCount": {
+                    "type": "integer"
+                  },
+                  "locks": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/Lock"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        }
+      },
+      "/lock-group-types": {
+        "get": {
+          "summary": "Get all lock group types",
+          "description": "Return all lock group types of this tenant.",
+          "security": [
+            {
+              "auth": [
+                "lock-group-types:read"
+              ]
+            }
+          ],
+          "tags": [
+            "lock-group-types"
+          ],
+          "responses": {
+            "200": {
+              "description": "list of lock group types",
+              "schema": {
+                "type": "object",
+                "required": [
+                  "totalCount",
+                  "lockGroupTypes"
+                ],
+                "properties": {
+                  "totalCount": {
+                    "type": "integer"
+                  },
+                  "lockGroupTypes": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/LockGroupType"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "403": {
+              "$ref": "#/responses/ForbiddenResponse"
+            }
+          }
+        },
+        "post": {
+          "summary": "Create a lock group type",
+          "description": "Creates lock group type and returns it with a generated ID",
+          "security": [
+            {
+              "auth": [
+                "lock-group-types:write"
+              ]
+            }
+          ],
+          "tags": [
+            "lock-group-types"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/WriteLockGroupType"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Lock group type with a generated ID",
+              "schema": {
+                "$ref": "#/definitions/WriteLockGroupType"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "403": {
+              "$ref": "#/responses/ForbiddenResponse"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        }
+      },
+      "/lock-group-types/{id}": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/id"
+          }
+        ],
+        "get": {
+          "summary": "Get the lock group type",
+          "description": "Gets lock group type",
+          "security": [
+            {
+              "auth": [
+                "lock-group-types:read"
+              ]
+            }
+          ],
+          "tags": [
+            "lock-group-types"
+          ],
+          "responses": {
+            "200": {
+              "description": "The lock group type",
+              "schema": {
+                "$ref": "#/definitions/LockGroupType"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "403": {
+              "$ref": "#/responses/ForbiddenResponse"
+            }
+          }
+        },
+        "put": {
+          "summary": "Update the lock group type",
+          "description": "Updates lock group type",
+          "security": [
+            {
+              "auth": [
+                "lock-group-types:write"
+              ]
+            }
+          ],
+          "tags": [
+            "lock-group-types"
+          ],
+          "responses": {
+            "200": {
+              "description": "Updated lock group type",
+              "schema": {
+                "$ref": "#/definitions/WriteLockGroupType"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "403": {
+              "$ref": "#/responses/ForbiddenResponse"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Delete the lock group type",
+          "description": "Deletes lock group type",
+          "security": [
+            {
+              "auth": [
+                "lock-group-types:write"
+              ]
+            }
+          ],
+          "tags": [
+            "lock-group-types"
+          ],
+          "responses": {
+            "204": {
+              "description": "deleted this lock group type"
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "403": {
+              "$ref": "#/responses/ForbiddenResponse"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        }
+      },
+      "/devices": {
+        "get": {
+          "summary": "Get all devices.",
+          "description": "Return all devices of this tenant.\n\nThe result list can be\n  - restricted to a maximum number of entries (_limit_) and\n  - started at a specific position (_offset_)\n\nThe _query_ parameter allows to search for devices containing a specific substring in its name.\n",
+          "security": [
+            {
+              "auth": [
+                "devices:read"
+              ]
+            }
+          ],
+          "tags": [
+            "devices"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/offset"
+            },
+            {
+              "$ref": "#/parameters/limit"
+            },
+            {
+              "$ref": "#/parameters/query"
+            },
+            {
+              "name": "hasDeviceGroup",
+              "in": "query",
+              "type": "string",
+              "enum": [
+                true,
+                false
+              ],
+              "description": "*true* returns only devices which have a device group, *false* returns only devices that don't have a device group"
+            },
+            {
+              "name": "deviceType",
+              "in": "query",
+              "description": "Search for a specific device type. Currently we only have *nfcCard* and *mobileDevice*",
+              "type": "string",
+              "enum": [
+                "nfcCard",
+                "mobileDevice"
+              ]
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "list of devices",
+              "schema": {
+                "type": "object",
+                "required": [
+                  "totalCount",
+                  "devices"
+                ],
+                "properties": {
+                  "totalCount": {
+                    "type": "integer"
+                  },
+                  "devices": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/Device"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        }
+      },
+      "/devices/me": {
+        "get": {
+          "summary": "Get detail data for authenticated device.",
+          "description": "Requires a device access token. Calling this method with a client or user access token results in a 403 Forbidden response.",
+          "security": [
+            {
+              "auth": []
+            }
+          ],
+          "tags": [
+            "devices"
+          ],
+          "responses": {
+            "200": {
+              "description": "device detail data",
+              "schema": {
+                "$ref": "#/definitions/Device"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "403": {
+              "schema": {
+                "$ref": "#/responses/ForbiddenResponse"
+              },
+              "description": "Access token does not contain a tenant or device id"
+            }
+          }
+        }
+      },
+      "/devices/{id}": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/id"
+          }
+        ],
+        "get": {
+          "summary": "Get detail data for this device.",
+          "security": [
+            {
+              "auth": [
+                "devices:read"
+              ]
+            }
+          ],
+          "tags": [
+            "devices"
+          ],
+          "responses": {
+            "200": {
+              "description": "device detail data",
+              "schema": {
+                "$ref": "#/definitions/Device"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "404": {
+              "description": "no device found with this id"
+            }
+          }
+        },
+        "put": {
+          "summary": "Modify this device.",
+          "description": "Allows to change the name / description of this device.\n",
+          "security": [
+            {
+              "auth": [
+                "devices:write"
+              ]
+            }
+          ],
+          "tags": [
+            "devices"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/WriteDevice"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "modified this device",
+              "schema": {
+                "$ref": "#/definitions/Device"
+              }
+            },
+            "400": {
+              "description": "input data could not be parsed"
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "404": {
+              "description": "no device found for this id"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        }
+      },
+      "/device-groups": {
+        "get": {
+          "summary": "Get all device groups.",
+          "description": "Return all device groups of this tenant.\n\nThe result list can be\n  - restricted to a maximum number of entries (_limit_) and\n  - started at a specific position (_offset_)\n\nThe _query_ parameter allows to search for device groups containing a specific substring in their name.\n",
+          "security": [
+            {
+              "auth": [
+                "device-groups:read"
+              ]
+            }
+          ],
+          "tags": [
+            "device-groups"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/offset"
+            },
+            {
+              "$ref": "#/parameters/limit"
+            },
+            {
+              "$ref": "#/parameters/query"
+            },
+            {
+              "name": "externalId",
+              "type": "string",
+              "in": "query",
+              "description": "Searches for a device group with exactly this external id"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "get all device groups",
+              "schema": {
+                "type": "object",
+                "required": [
+                  "totalCount",
+                  "deviceGroups"
+                ],
+                "properties": {
+                  "totalCount": {
+                    "type": "integer"
+                  },
+                  "deviceGroups": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/DeviceGroup"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        },
+        "post": {
+          "summary": "Create new device group.",
+          "description": "Create a new logical group for several devices.\n",
+          "security": [
+            {
+              "auth": [
+                "device-groups:write"
+              ]
+            }
+          ],
+          "tags": [
+            "device-groups"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/WriteDeviceGroup"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "created new device group",
+              "schema": {
+                "$ref": "#/definitions/DeviceGroup"
+              }
+            },
+            "400": {
+              "description": "input data wrong probably"
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        }
+      },
+      "/device-groups/{id}": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/id"
+          }
+        ],
+        "get": {
+          "summary": "Get details of this device group.",
+          "security": [
+            {
+              "auth": [
+                "device-groups:read"
+              ]
+            }
+          ],
+          "tags": [
+            "device-groups"
+          ],
+          "responses": {
+            "200": {
+              "description": "device group details",
+              "schema": {
+                "$ref": "#/definitions/DeviceGroup"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "404": {
+              "description": "no device group found with this id"
+            }
+          }
+        },
+        "put": {
+          "summary": "Modify this device group.",
+          "description": "Allows to change the name / description of this group.\n",
+          "security": [
+            {
+              "auth": [
+                "device-groups:write"
+              ]
+            }
+          ],
+          "tags": [
+            "device-groups"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/WriteDeviceGroup"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "modified this device group",
+              "schema": {
+                "$ref": "#/definitions/DeviceGroup"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Delete this device group.",
+          "security": [
+            {
+              "auth": [
+                "device-groups:write"
+              ]
+            }
+          ],
+          "tags": [
+            "device-groups"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/id"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "deleted this device group#"
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        }
+      },
+      "/device-groups/{id}/devices": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/id"
+          }
+        ],
+        "get": {
+          "summary": "Get group's devices",
+          "security": [
+            {
+              "auth": [
+                "device-groups:read",
+                "devices:read"
+              ]
+            }
+          ],
+          "tags": [
+            "device-groups"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/offset"
+            },
+            {
+              "$ref": "#/parameters/limit"
+            },
+            {
+              "$ref": "#/parameters/query"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "list of devices",
+              "schema": {
+                "type": "object",
+                "required": [
+                  "totalCount",
+                  "devices"
+                ],
+                "properties": {
+                  "totalCount": {
+                    "type": "integer"
+                  },
+                  "devices": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/Device"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        }
+      },
+      "/device-groups/{id}/invitation-emails": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/id"
+          }
+        ],
+        "post": {
+          "summary": "Send an invitation email",
+          "description": "This operation sends an email containing a invitation link to the device group's email address. The invitation\nlink allows a single mobile device to join a device group. It's a convenient but rather insecure way to connect\na mobile device with a device group. Use it only in non-critical scenarios. Risks of using this feature:\n  * A typo in the email address sents the link to the wrong person. The email address is not validated.\n  * An attacker could intercept the message, since the email is unencrypted.\n\nThe invitation link gives full access to all access permissions of the device group. Leaking this link\ncan have serious consequences. The invitation link expires after 48 hours.\n",
+          "security": [
+            {
+              "auth": [
+                "device-groups:write"
+              ]
+            }
+          ],
+          "tags": [
+            "device-groups"
+          ],
+          "responses": {
+            "201": {
+              "description": "Invitation email sent"
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "404": {
+              "description": "Device group does not exist or has no email address"
+            }
+          }
+        }
+      },
+      "/device-groups/_/join": {
+        "post": {
+          "summary": "Join device group by providing an invitation code",
+          "description": "A mobile device calls this endpoint to assosiate its device ID with the device group attached to the invitation code.\nThe provided security token must contain a device ID.\n",
+          "security": [
+            {
+              "auth": []
+            }
+          ],
+          "tags": [
+            "device-groups"
+          ],
+          "parameters": [
+            {
+              "name": "X-Device-Invitation-Code",
+              "in": "header",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Device was attached to the device group"
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "403": {
+              "description": "Forbidden"
+            },
+            "404": {
+              "description": "Invitation code not found"
+            },
+            "422": {
+              "description": "Invalid validation code"
+            }
+          }
+        }
+      },
+      "/access-permissions": {
+        "get": {
+          "summary": "Get all access permissions.",
+          "description": "Return all access permissions of this tenant.\nThe result list can be limited and started at a specific position (_offset_).\nThe _query_ parameter allows to search for access permissions containing a specific substring in its name, accessPermissionGroupId or\nin of the external ids.\nThe _orderBy_ parameter can be used to sort by creationTime, lockGroupName, deviceGroupName or accessPermissionGroupId\n",
+          "security": [
+            {
+              "auth": [
+                "access-permissions:read"
+              ]
+            }
+          ],
+          "tags": [
+            "access-permissions"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/offset"
+            },
+            {
+              "$ref": "#/parameters/limit"
+            },
+            {
+              "$ref": "#/parameters/query"
+            },
+            {
+              "$ref": "#/parameters/orderBy"
+            },
+            {
+              "name": "deviceGroupId",
+              "in": "query",
+              "type": "string",
+              "description": "return access permissions only with the specified deviceGroupId"
+            },
+            {
+              "name": "lockGroupId",
+              "in": "query",
+              "type": "string",
+              "description": "return access permissions only with the specified lockGroupId"
+            },
+            {
+              "name": "status",
+              "in": "query",
+              "type": "string",
+              "enum": [
+                "active"
+              ]
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "list of access permissions",
+              "schema": {
+                "type": "object",
+                "required": [
+                  "totalCount",
+                  "accessPermissions"
+                ],
+                "properties": {
+                  "totalCount": {
+                    "type": "integer"
+                  },
+                  "accessPermissions": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/AccessPermission"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        },
+        "post": {
+          "summary": "Create new access permissions.",
+          "description": "Allows all devices in the associated _device group_ to access all the locks in the associated _lock group_ within the specified time period.\n",
+          "security": [
+            {
+              "auth": [
+                "access-permissions:write"
+              ]
+            }
+          ],
+          "tags": [
+            "access-permissions"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/WriteAccessPermission"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "created access permission",
+              "schema": {
+                "$ref": "#/definitions/AccessPermission"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        }
+      },
+      "/access-permissions/{id}": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/id"
+          }
+        ],
+        "get": {
+          "summary": "Get details for this access permission.",
+          "security": [
+            {
+              "auth": [
+                "access-permissions:read"
+              ]
+            }
+          ],
+          "tags": [
+            "access-permissions"
+          ],
+          "responses": {
+            "200": {
+              "description": "access permission",
+              "schema": {
+                "$ref": "#/definitions/AccessPermission"
+              }
+            }
+          }
+        },
+        "delete": {
+          "summary": "Revoke this access permission.",
+          "description": "Technically an access permission is never deleted but kept around. _Revoking_ just switches the\ninternal state from 'allowed' to 'denied'. I.e. the associated devices don't have access to the\nassociated locks any longer.\n",
+          "security": [
+            {
+              "auth": [
+                "access-permissions:write"
+              ]
+            }
+          ],
+          "tags": [
+            "access-permissions"
+          ],
+          "responses": {
+            "200": {
+              "description": "the revoked access permission",
+              "schema": {
+                "$ref": "#/definitions/AccessPermission"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "404": {
+              "description": "no access permission found with this id"
+            }
+          }
+        }
+      },
+      "/users": {
+        "get": {
+          "summary": "Get all users",
+          "description": "Return all users of this tenant.\nThe result list can be\n  - restricted to a maximum number of entries (_limit_) and\n  - started at a specific position (_offset_)\n\nThe _query_ parameter allows to search for users containing a specific substring in their username or last name.\n",
+          "security": [
+            {
+              "auth": [
+                "users:read"
+              ]
+            }
+          ],
+          "tags": [
+            "users"
+          ],
+          "parameters": [
+            {
+              "in": "query",
+              "name": "query",
+              "description": "A string to search for in the \"username\" or \"lastName\" attribute",
+              "type": "string"
+            },
+            {
+              "in": "query",
+              "name": "orderBy",
+              "description": "Sort order. It's possible to order by column \"username\" and \"lastName\" attribute. Examples:\n  * username/asc\n  * lastName/desc,username\n",
+              "type": "string"
+            },
+            {
+              "in": "query",
+              "name": "limit",
+              "description": "Maximum number of items returned in the result. Must satisfy the constraint 1 <= limit <= 50",
+              "type": "integer",
+              "default": 50
+            },
+            {
+              "in": "query",
+              "name": "offset",
+              "description": "Number of items to skip before beginning to return items. Must be a positive integer.",
+              "type": "integer",
+              "default": 0
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": {
+                "type": "object",
+                "required": [
+                  "totalCount",
+                  "users"
+                ],
+                "properties": {
+                  "totalCount": {
+                    "type": "integer"
+                  },
+                  "users": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/User"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        },
+        "post": {
+          "summary": "Add a new user",
+          "security": [
+            {
+              "auth": [
+                "users:write"
+              ]
+            }
+          ],
+          "tags": [
+            "users"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/WriteUser"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "User created successfully",
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "password"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "The id of the new user"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "The randomly generated initial user password"
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        }
+      },
+      "/users/{id}": {
+        "get": {
+          "summary": "Get details of this user.",
+          "security": [
+            {
+              "auth": [
+                "users:read"
+              ]
+            }
+          ],
+          "tags": [
+            "users"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/id"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "user details",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "404": {
+              "description": "no user found with this id"
+            }
+          }
+        },
+        "put": {
+          "summary": "Modify this user.",
+          "security": [
+            {
+              "auth": [
+                "users:write"
+              ]
+            }
+          ],
+          "tags": [
+            "users"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/id"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/WriteUser"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "user details",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        },
+        "delete": {
+          "summary": "delete this user",
+          "security": [
+            {
+              "auth": [
+                "users:write"
+              ]
+            }
+          ],
+          "tags": [
+            "users"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/id"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "OK"
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "404": {
+              "description": "User does not exist"
+            }
+          }
+        }
+      },
+      "/users/{id}/roles": {
+        "get": {
+          "summary": "Get user's roles",
+          "security": [
+            {
+              "auth": [
+                "users:read",
+                "roles:read"
+              ]
+            }
+          ],
+          "tags": [
+            "users"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/id"
+            },
+            {
+              "$ref": "#/parameters/offset"
+            },
+            {
+              "$ref": "#/parameters/limit"
+            },
+            {
+              "$ref": "#/parameters/query"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "list of roles",
+              "schema": {
+                "type": "object",
+                "required": [
+                  "totalCount",
+                  "roles"
+                ],
+                "properties": {
+                  "totalCount": {
+                    "type": "integer"
+                  },
+                  "roles": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/Role"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        }
+      },
+      "/users/me": {
+        "get": {
+          "summary": "Get details of the authenticated user",
+          "security": [
+            {
+              "auth": []
+            }
+          ],
+          "tags": [
+            "users"
+          ],
+          "responses": {
+            "200": {
+              "description": "user details",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        }
+      },
+      "/users/me/roles": {
+        "get": {
+          "summary": "Get roles of the authenticated user",
+          "security": [
+            {
+              "auth": []
+            }
+          ],
+          "tags": [
+            "users"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/offset"
+            },
+            {
+              "$ref": "#/parameters/limit"
+            },
+            {
+              "$ref": "#/parameters/query"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "list of roles",
+              "schema": {
+                "type": "object",
+                "required": [
+                  "totalCount",
+                  "roles"
+                ],
+                "properties": {
+                  "totalCount": {
+                    "type": "integer"
+                  },
+                  "roles": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/Role"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        }
+      },
+      "/users/me/password": {
+        "put": {
+          "description": "Change current user password.",
+          "security": [
+            {
+              "auth": []
+            }
+          ],
+          "tags": [
+            "users"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "currentPassword": {
+                    "type": "string"
+                  },
+                  "newPassword": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Password has been successfully changed"
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        }
+      },
+      "/roles": {
+        "get": {
+          "summary": "Gets a list of all defined roles.",
+          "description": "Return all defined roles of this tenant.\nThe result list can be\n  - restricted to a maximum number of entries (_limit_) and\n  - started at a specific position (_offset_)\n\nThe _query_ parameter allows to search for roles containing a specific substring in its name.\n",
+          "security": [
+            {
+              "auth": [
+                "roles:read"
+              ]
+            }
+          ],
+          "tags": [
+            "roles"
+          ],
+          "responses": {
+            "200": {
+              "description": "get all roles",
+              "schema": {
+                "type": "object",
+                "required": [
+                  "totalCount",
+                  "roles"
+                ],
+                "properties": {
+                  "totalCount": {
+                    "type": "integer"
+                  },
+                  "roles": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/Role"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            }
+          }
+        },
+        "post": {
+          "summary": "Creates a new role.",
+          "description": "Creates a new role as a container of finer-grained _permissions_.\n",
+          "security": [
+            {
+              "auth": [
+                "roles:write"
+              ]
+            }
+          ],
+          "tags": [
+            "roles"
+          ],
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "description": "The actual data of the new role.\nThe field is in here only for pragmatic reasons and can be left empty.\n",
+              "schema": {
+                "$ref": "#/definitions/WriteRole"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "A new role was created.",
+              "schema": {
+                "$ref": "#/definitions/Role"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        }
+      },
+      "/roles/{id}": {
+        "get": {
+          "summary": "Gets the details of this role",
+          "security": [
+            {
+              "auth": [
+                "roles:read"
+              ]
+            }
+          ],
+          "tags": [
+            "roles"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/id"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "the details of this role",
+              "schema": {
+                "$ref": "#/definitions/Role"
+              }
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "404": {
+              "description": "no role found with this id"
+            }
+          }
+        },
+        "put": {
+          "summary": "Updates the role with this id.",
+          "description": "Allows to update the name of the role only currently\n",
+          "security": [
+            {
+              "auth": [
+                "roles:write"
+              ]
+            }
+          ],
+          "tags": [
+            "roles"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/id"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/WriteRole"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "the role was updated."
+            },
+            "400": {
+              "$ref": "#/responses/BadRequestResponse"
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Deletes the role with this id.",
+          "description": "Deletes this role unless it is _read only_.\n",
+          "security": [
+            {
+              "auth": [
+                "roles:write"
+              ]
+            }
+          ],
+          "tags": [
+            "roles"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/id"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Deleted this object"
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "403": {
+              "$ref": "#/responses/ForbiddenResponse"
+            }
+          }
+        }
+      },
+      "/nfc-cards/{id}": {
+        "put": {
+          "summary": "Updates the NFC card to device mapping",
+          "security": [
+            {
+              "auth": [
+                "nfc-token-writer-api-internal"
+              ]
+            }
+          ],
+          "tags": [
+            "internal"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/parameters/id"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "required": [
+                  "tenantId",
+                  "nfcCardId",
+                  "deviceExternalId"
+                ],
+                "properties": {
+                  "tenantId": {
+                    "type": "string"
+                  },
+                  "nfcCardId": {
+                    "type": "string"
+                  },
+                  "deviceExternalId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "the mapping was updated"
+            },
+            "400": {
+              "$ref": "#/responses/BadRequestResponse"
+            },
+            "401": {
+              "$ref": "#/responses/NotAuthorizedResponse"
+            },
+            "422": {
+              "$ref": "#/responses/UnprocessableEntityResponse"
+            }
+          }
+        }
+      }
+    }
+  }

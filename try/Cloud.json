@@ -1,0 +1,70 @@
+{
+	"API":{
+		"SwaggerFile":"swagger.json",
+		"defaultTimeout":60
+	},
+	"basepath":"/v1",
+	"port":3000,
+	"Lambda":{
+		"locks":{
+			"Timeout":10,
+			"Code":"Categories2/index.handler",
+			"bin":"",
+			"api":{
+				"method":"ANY",
+				"url":"/locks"
+			},
+			"Variable":{
+				"SomeVariable":"Show that Variable"
+			}
+		},
+		"cylinders":{
+			"Timeout":10,
+			"Code":"Categories2/index.handler",
+			"bin":"",
+			"api":{
+				"method":"GET",
+				"url":"/cylinders"
+			},
+			"Variable":{
+				"SomeVariable":"Show that Variable"
+			}
+		},
+		"Categories1":{
+			"Timeout":10,
+			"Code":"Categories/index.handler",
+			"bin":"",
+			"api":{
+				"method":"ANY",
+				"url":"/oauth2/clients"
+			},
+			"Variable":{
+				"SomeVariable":"Show that Variable"
+			}
+		},
+		"Categories":{
+			"Timeout":10,
+			"Code":"Categories/index.handler",
+			"bin":"",
+			"api":{
+				"method":"ANY",
+				"url":"/oauth2/12"
+			},
+			"Variable":{
+				"SomeVariable":"Show that Variable"
+			}
+		},
+		"Categories2":{
+			"Timeout":20,
+			"Code":"Categories/index.handler",
+			"bin":"",
+			"api":{
+				"method":"ANY",
+				"url":"/categories2"
+			},
+			"Variable":{
+				"SomeVariable":"Show that Variable"
+			}
+		}
+	}
+}
