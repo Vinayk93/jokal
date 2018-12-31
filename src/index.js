@@ -102,9 +102,13 @@ function Implements_ProxyServer(app,startportno,json,proxy) {
         // static content || swagger file
         app.set('view engine', 'ejs');
         app.engine('html', ejs.renderFile);
-        app.set('views', path.join(process.cwd() + '/../public/swagger'));
+        // app.set('views', path.join(process.cwd() + '/../public/swagger'));
+        // const swaggerDocument = require(process.cwd()+'/swagger.json');
+        // app.use('/', express.static(path.join(process.cwd(), '/../public')));
+        app.set('views', path.join(__dirname + '/../public/swagger'));
         const swaggerDocument = require(process.cwd()+'/swagger.json');
-        app.use('/', express.static(path.join(process.cwd(), '/../public')));
+        app.use('/', express.static(path.join(__dirname, '/../public')));
+        
         app.get('/swagger',(req,res)=>{
             // console.log("hellow");
             console.log(swaggerDocument);
@@ -120,7 +124,7 @@ function Implements_ProxyServer(app,startportno,json,proxy) {
             let options={
                 "router":{},
                 changeOrigin: true,
-                target: "http://www.example.org",
+                target: "http://localhost",
                 proxyTimeout: 20000,
                 timeout: 20000,
             };

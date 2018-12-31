@@ -16,3 +16,10 @@ Task Remaining:
 4. PATH change
 5. Multiserver functionality + dev == prod
 6. CLI
+
+Currenly facing issues:
+1. CLI support necessary
+2. too much work on the swagger docs
+3. 2 way changes 1 docs + 1 code
+4. biolerplate of lambda
+

@@ -19,7 +19,10 @@ var jokal = require('./src');
 var proxy = require('http-proxy-middleware');
 var express = require('express');
 var proxy_server = express();
-
+// console.log(process.env);
+if(process.env.DEBUG){
+    console.log = function(){};
+}
 /**location,environment-variable,callback for starting the process */
 var fs = require('fs');
 fs.readFile(process.cwd()+'/Cloud.json',function(err,data){
